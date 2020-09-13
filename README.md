@@ -1,5 +1,12 @@
 # ExExport
 
+ This library provides an easy way to make barrel files in Elixir.
+
+      A barrel is a way to rollup exports from several modules into a single convenient module.
+      The barrel itself is a module file that re-exports selected exports of other modules.
+    
+ Source: [Barasat Gitbooks](https://basarat.gitbook.io/typescript/main-1/barrel)
+
 I have grown used to having a lot of little files that get bundled up into a library (blame my time working
 in node/ES6 land).  Because of the compiled nature of Elixir it seemed like this style of file structure
 should work without run time penalties.  

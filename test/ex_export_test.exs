@@ -14,11 +14,11 @@ defmodule ExExportTest do
     assert Farewell.goodbye("Bob") == "Goodbye Bob!"
   end
 
-
   test "Uses the hello from the Greet module" do
     assert Sample.hello() == "Hello world!"
     assert Sample.hello("Bob") == "Hello Bob!"
   end
+
   test "uses the goodbye from the Farewell module" do
     assert Sample.goodbye() == "Goodbye world!"
     assert Sample.goodbye("Bob") == "Goodbye Bob!"

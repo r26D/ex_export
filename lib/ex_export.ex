@@ -20,20 +20,21 @@ defmodule ExExport do
     resolved = Macro.expand(module, __CALLER__)
 
     resolved.__info__(:functions)
-    |> Enum.map(
-         fn ({func, arity}) ->
-           args = if arity == 0 do
-             ""
-           else
-             Enum.to_list(1..arity)
-             |> Enum.map(fn _ -> 'arg' end)
-             |> Enum.join(",")
-           end
-           {:ok, func_args} = Code.string_to_quoted("#{func}(#{args})")
-           quote do
-             defdelegate unquote(func_args), to: unquote(resolved)
-           end
-         end
-       )
+    |> Enum.map(fn {func, arity} ->
+      args =
+        if arity == 0 do
+          ""
+        else
+          Enum.to_list(1..arity)
+          |> Enum.map(fn _ -> 'arg' end)
+          |> Enum.join(",")
+        end
+
+      {:ok, func_args} = Code.string_to_quoted("#{func}(#{args})")
+
+      quote do
+        defdelegate unquote(func_args), to: unquote(resolved)
+      end
+    end)
   end
 end
