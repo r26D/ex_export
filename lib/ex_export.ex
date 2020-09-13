@@ -38,18 +38,15 @@ defmodule ExExport do
     resolved_module.__info__(:functions)
     |> Enum.map(
          fn {func, arity} ->
-           IO.puts("#{func}/#{arity} #{included(func, arity, only)} #{not_excluded(func, arity, exclude)}")
+        #   IO.puts("#{func}/#{arity} #{included(func, arity, only)} #{not_excluded(func, arity, exclude)}")
 
            if included(func, arity, only)
              && not_excluded(func, arity, exclude) do
-
-
              args = build_args(arity)
              {:ok, func_args} = Code.string_to_quoted("#{func}(#{args})")
              delegate(func_args, resolved_module)
-
-           else
-             IO.puts("Skipping #{func}/#{arity}")
+#           else
+#             IO.puts("Skipping #{func}/#{arity}")
            end
          end
        )
