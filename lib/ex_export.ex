@@ -12,8 +12,11 @@ defmodule ExExport do
 
       ExExport.export(Greet)
       ExExport.export(Sample.Actions.Farewell)
-  end
 
+     end
+  ## Options
+    * `:only` - (since v0.2.0) a list of [function: arity] only matching functions will be delegated
+    * `:exclude` - (since v0.2.0) a list of [function: arity]  matching functions will *NOT* be delegated
 
   """
   defmacro export(module, opts \\ []) do
