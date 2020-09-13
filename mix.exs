@@ -34,11 +34,7 @@ defmodule ExExport.MixProject do
   defp description do
     """
      This library provides an easy way to make barrel files in Elixir.
-
       A barrel is a way to rollup exports from several modules into a single convenient module.
-      The barrel itself is a module file that re-exports selected exports of other modules.
-      Source: Barasat Gitbooks
-       https://basarat.gitbook.io/typescript/main-1/barrel
     """
   end
 
