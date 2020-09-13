@@ -17,8 +17,11 @@ Javascript.
 ```elixir
 #api.ex
 defmodule API do
-  ExExport.export(API.Actions.Welcome)
+  require ExExport
+  alias API.Actions.Welcome
+  ExExport.export(Welcome)
   ExExport.export(API.Actions.Farewell)
+
 end      
 ```
 
