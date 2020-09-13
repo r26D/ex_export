@@ -1,8 +1,11 @@
 defmodule ExExportTest do
   use ExUnit.Case
   doctest ExExport
-  alias Sample.Actions.Farewell
-  alias Sample.Actions.Greet
+  alias Sample.Actions.{
+    Farewell,
+    Greet,
+    AllButAction,
+    OnlySomeAction}
 
   test "Greet in the module" do
     assert Greet.hello() == "Hello world!"
@@ -22,5 +25,30 @@ defmodule ExExportTest do
   test "uses the goodbye from the Farewell module" do
     assert Sample.goodbye() == "Goodbye world!"
     assert Sample.goodbye("Bob") == "Goodbye Bob!"
+  end
+
+  test "able to exclude functions from the export" do
+    assert AllButAction.all_but_action1() == "action1"
+    assert AllButAction.all_but_action1("bob") == "action1 bob!"
+    assert AllButAction.all_but_action2("bob") == "action2 bob!"
+
+    assert Sample.all_but_action1() == "action1"
+
+    assert_raise UndefinedFunctionError, fn ->
+       Sample.all_but_action1("bob") == "action1 bob!"
+    end
+    assert Sample.all_but_action2("bob") == "action2 bob!"
+
+  end
+  test "able to include only specific functions from the export" do
+    assert OnlySomeAction.some_action1() == "action1"
+    assert OnlySomeAction.some_action1("bob") == "action1 bob!"
+
+
+    assert_raise UndefinedFunctionError, fn ->
+      Sample.some_action1() == "action1"
+    end
+    assert Sample.some_action1("bob") == "action1 bob!"
+
   end
 end

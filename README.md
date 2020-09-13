@@ -28,12 +28,19 @@ defmodule API do
   alias API.Actions.Welcome
   ExExport.export(Welcome)
   ExExport.export(API.Actions.Farewell)
+  ExExport.export(API.Actions.AllButAction,exclude: [all_but_action1: 1])
+  ExExport.export(API.Actions.OnlySomeAction,only: [some_action1: 1])
 
 end      
 ```
 
 This adds defdelegate for all public methods in the referenced files.
 
+## :only
+This option allows you to set a list of specific functions/arity to include
+
+## :exclude
+This includes all public functions except the ones matching the list of function/arity
 
 ## Installation
 
