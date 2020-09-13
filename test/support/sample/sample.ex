@@ -1,4 +1,8 @@
 defmodule Sample do
-  #  ExExport.export(Sample.Actions.Greet)
-  #  ExExport.export(Sample.Actions.Farewell)
+  require ExExport
+  alias  Sample.Actions.Greet
+
+  ExExport.export(Greet)
+  ExExport.export(Sample.Actions.Farewell)
+
 end
