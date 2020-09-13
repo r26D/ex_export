@@ -64,8 +64,7 @@ defmodule ExExport.MixProject do
 
   defp aliases do
     [
-      tag:
-        "cmd git tag -a v#{@version} -m 'Version #{@version}';cmd git push origin v#{@version}",
+      tag: "cmd git tag -a v#{@version} -m 'Version #{@version}';cmd git push origin v#{@version}",
       prettier: "format \"mix.exs\" \"{lib,test}/**/*.{ex,exs}\""
     ]
   end
