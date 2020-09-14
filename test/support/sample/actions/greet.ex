@@ -6,4 +6,8 @@ defmodule Sample.Actions.Greet do
   def hello(name) do
     "Hello #{name}!"
   end
+
+  def more_args(first, second, third) do
+    [first, second,third]
+  end
 end

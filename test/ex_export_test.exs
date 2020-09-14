@@ -11,6 +11,11 @@ defmodule ExExportTest do
     assert Greet.hello() == "Hello world!"
     assert Greet.hello("Bob") == "Hello Bob!"
   end
+  test "handle multiple arguments" do
+    assert Greet.more_args("me", "myself", "I") == ["me", "myself", "I"]
+    assert Sample.more_args("me", "myself", "I") == ["me", "myself", "I"]
+
+  end
 
   test "Farewell in the module" do
     assert Farewell.goodbye() == "Goodbye world!"

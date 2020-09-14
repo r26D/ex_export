@@ -76,7 +76,7 @@ defmodule ExExport do
   defp build_args(0), do: ""
   defp build_args(arity) do
     Enum.to_list(1..arity)
-    |> Enum.map(fn _ -> 'arg' end)
+    |> Enum.map(fn idx -> "arg#{idx}" end)
     |> Enum.join(",")
   end
   defp delegate(func_args, resolved_module) do
