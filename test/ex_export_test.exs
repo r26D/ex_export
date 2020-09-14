@@ -5,6 +5,7 @@ defmodule ExExportTest do
     Farewell,
     Greet,
     AllButAction,
+    NotDelegate,
     OnlySomeAction}
 
   test "Greet in the module" do
@@ -40,7 +41,7 @@ defmodule ExExportTest do
     assert Sample.all_but_action1() == "action1"
 
     assert_raise UndefinedFunctionError, fn ->
-       Sample.all_but_action1("bob") == "action1 bob!"
+      Sample.all_but_action1("bob") == "action1 bob!"
     end
     assert Sample.all_but_action2("bob") == "action2 bob!"
 
@@ -54,6 +55,17 @@ defmodule ExExportTest do
       Sample.some_action1() == "action1"
     end
     assert Sample.some_action1("bob") == "action1 bob!"
+
+  end
+  test "able to  export with a do instead of a defdelegate" do
+    assert NotDelegate.not_delegated() == "Hello world!"
+
+    assert NotDelegate.not_delegated("bob") == "Hello world bob!"
+    assert NotDelegate.not_delegated_list(1,2,3) == [1,2,3]
+
+    assert Sample.not_delegated() == "Hello world!"
+    assert Sample.not_delegated("bob") == "Hello world bob!"
+    assert Sample.not_delegated_list(1,2,3) == [1,2,3]
 
   end
 end

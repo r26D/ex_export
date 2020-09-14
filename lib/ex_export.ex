@@ -3,7 +3,7 @@ defmodule ExExport do
   This module inspects another module for public functions and generates the defdelegate needed to add them to the local modules name space
   """
 
-   require Logger
+  require Logger
   @doc """
     require in the module and them call export for each module you want to import.
     ## Examples
@@ -18,20 +18,18 @@ defmodule ExExport do
   ## Options
     * `:only` - (since v0.2.0) a list of [function: arity] only matching functions will be delegated
     * `:exclude` - (since v0.2.0) a list of [function: arity]  matching functions will *NOT* be delegated
+    * `:delegate` - (since v0.3.0) true/false default true - true means that it will use defdelegate - false it
+        builds a local function and maps it manually.
+
 
   """
   defmacro export(module, opts \\ []) do
+
     resolved_module = Macro.expand(module, __CALLER__)
 
-
-    only = case Keyword.fetch(opts, :only) do
-      :error -> nil
-      {:ok, val} -> val
-    end
-    exclude = case Keyword.fetch(opts, :exclude) do
-      :error -> nil
-      {:ok, val} -> val
-    end
+    delegate = get_keyword(opts, :delegate, true)
+    only = get_keyword(opts, :only)
+    exclude = get_keyword(opts, :exclude)
     if (exclude && only)  do
       raise ArgumentError,
             message: ":only and :exclude are mutually exclusive"
@@ -41,20 +39,39 @@ defmodule ExExport do
     resolved_module.__info__(:functions)
     |> Enum.map(
          fn {func, arity} ->
-        #   IO.puts("#{func}/#{arity} #{included(func, arity, only)} #{not_excluded(func, arity, exclude)}")
+           if included(func, arity, only) && not_excluded(func, arity, exclude) do
 
-           if included(func, arity, only)
-             && not_excluded(func, arity, exclude) do
-             args = build_args(arity)
-             Logger.debug("defdelegate #{func}(#{args}), to: #{resolved_module}")
-             {:ok, func_args} = Code.string_to_quoted("#{func}(#{args})")
-             delegate(func_args, resolved_module)
-#           else
-#             IO.puts("Skipping #{func}/#{arity}")
+             if delegate do
+               use_delegate(func, build_args(arity), resolved_module)
+             else
+               use_def(func, build_args(arity), resolved_module)
+             end
+           else
+             Logger.debug("Skipping #{func}/#{arity}")
            end
          end
        )
   end
+
+  defp get_keyword(list, label, default \\ nil) do
+    case Keyword.fetch(list, label) do
+      :error -> default
+      {:ok, val} -> val
+    end
+  end
+  defp safe_to_atom(nil), do: nil
+  defp safe_to_atom(value) do
+    try do
+      if is_atom(value) do
+        value
+      else
+        String.to_existing_atom(value)
+      end
+    rescue
+      ArgumentError -> String.to_atom(value)
+    end
+  end
+
   defp included(_func, _arity, nil), do: true
 
   defp included(func, arity, only) do
@@ -64,28 +81,41 @@ defmodule ExExport do
   defp not_excluded(_func, _arity, nil), do: true
 
   defp not_excluded(func, arity, exclude) do
-  if  found?(func, arity, exclude), do: false ,else: true
+    if  found?(func, arity, exclude), do: false, else: true
 
   end
 
-  defp found?(func,arity,list) do
+  defp found?(func, arity, list) do
     result = list
-    |> Enum.find_index(
-         fn {f, a} ->
-           f == func and a == arity
-         end
-       )|> is_nil
-      !result
+             |> Enum.find_index(
+                  fn {f, a} ->
+                    f == func and a == arity
+                  end
+                )
+             |> is_nil
+    !result
   end
-  defp build_args(0), do: ""
+  defp build_args(0), do: []
   defp build_args(arity) do
     Enum.to_list(1..arity)
     |> Enum.map(fn idx -> "arg#{idx}" end)
-    |> Enum.join(",")
   end
-  defp delegate(func_args, resolved_module) do
+
+  defp use_delegate(func, args, resolved_module) do
+    str_args = Enum.join(args, ",")
+    {:ok, func_args} = Code.string_to_quoted("#{func}(#{str_args})")
+    Logger.debug("defdelegate #{func}(#{str_args}), to: #{resolved_module}")
     quote do
       defdelegate unquote(func_args), to: unquote(resolved_module)
+    end
+  end
+
+  defp use_def(func, args, resolved_module) do
+    str_args = Enum.join(args, ",")
+    Logger.debug("def #{func}(#{str_args}), do: #{resolved_module}.#{func}(#{str_args})")
+    {:ok, func_args} = Code.string_to_quoted("#{func}(#{str_args})")
+    quote do
+      def unquote(func_args), do: unquote(resolved_module).unquote(func_args)
     end
   end
 end
