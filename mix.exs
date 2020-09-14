@@ -12,6 +12,7 @@ defmodule ExExport.MixProject do
       aliases: aliases(),
       package: package(),
       description: description(),
+      extra_applications: [:logger],
       docs: [
         source_ref: "v#{@version}",
         main: "readme",

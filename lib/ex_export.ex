@@ -3,6 +3,7 @@ defmodule ExExport do
   This module inspects another module for public functions and generates the defdelegate needed to add them to the local modules name space
   """
 
+   require Logger
   @doc """
     require in the module and them call export for each module you want to import.
     ## Examples
@@ -35,6 +36,8 @@ defmodule ExExport do
       raise ArgumentError,
             message: ":only and :exclude are mutually exclusive"
     end
+
+    Logger.debug("<<<<< Exporting To #{inspect(__CALLER__.context_modules)}>>>>")
     resolved_module.__info__(:functions)
     |> Enum.map(
          fn {func, arity} ->
@@ -43,6 +46,7 @@ defmodule ExExport do
            if included(func, arity, only)
              && not_excluded(func, arity, exclude) do
              args = build_args(arity)
+             Logger.debug("defdelegate #{func}(#{args}), to: #{resolved_module}")
              {:ok, func_args} = Code.string_to_quoted("#{func}(#{args})")
              delegate(func_args, resolved_module)
 #           else
