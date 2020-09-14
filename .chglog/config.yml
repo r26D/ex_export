@@ -1,0 +1,35 @@
+style: github
+template: CHANGELOG.tpl.md
+info:
+  title: CHANGELOG
+  repository_url: https://github.com/r26D/ex_export
+options:
+  commits:
+     filters:
+       Type:
+         - feature
+         - feat
+         - bug
+         - fix
+         - perf
+         - refactor
+         - infra
+         - web
+  commit_groups:
+     title_maps:
+       feature: Features
+       feat: Features
+       bug: Bug Fixes
+       fix: Bug Fixes
+       perf: Performance Improvements
+       refactor: Code Refactoring
+       infra: Infrastructure
+       web: Web Site
+  header:
+    pattern: "^(\\w*)\\:\\s(.*)$"
+    pattern_maps:
+      - Type
+      - Subject
+  notes:
+    keywords:
+      - BREAKING CHANGE
