@@ -4,6 +4,7 @@ defmodule ExExport do
   """
 
   require Logger
+
   @doc """
     require in the module and them call export for each module you want to import.
     ## Examples
@@ -24,33 +25,31 @@ defmodule ExExport do
 
   """
   defmacro export(module, opts \\ []) do
-
     resolved_module = Macro.expand(module, __CALLER__)
 
     delegate = get_keyword(opts, :delegate, true)
     only = get_keyword(opts, :only)
     exclude = get_keyword(opts, :exclude)
-    if (exclude && only)  do
+
+    if exclude && only do
       raise ArgumentError,
-            message: ":only and :exclude are mutually exclusive"
+        message: ":only and :exclude are mutually exclusive"
     end
 
     Logger.debug("<<<<< Exporting To #{inspect(__CALLER__.context_modules)}>>>>")
-    resolved_module.__info__(:functions)
-    |> Enum.map(
-         fn {func, arity} ->
-           if included(func, arity, only) && not_excluded(func, arity, exclude) do
 
-             if delegate do
-               use_delegate(func, build_args(arity), resolved_module)
-             else
-               use_def(func, build_args(arity), resolved_module)
-             end
-           else
-             Logger.debug("Skipping #{func}/#{arity}")
-           end
-         end
-       )
+    resolved_module.__info__(:functions)
+    |> Enum.map(fn {func, arity} ->
+      if included(func, arity, only) && not_excluded(func, arity, exclude) do
+        if delegate do
+          use_delegate(func, build_args(arity), resolved_module)
+        else
+          use_def(func, build_args(arity), resolved_module)
+        end
+      else
+        Logger.debug("Skipping #{func}/#{arity}")
+      end
+    end)
   end
 
   defp get_keyword(list, label, default \\ nil) do
@@ -59,17 +58,14 @@ defmodule ExExport do
       {:ok, val} -> val
     end
   end
+
   defp safe_to_atom(nil), do: nil
+  defp safe_to_atom(value) when is_atom(value), do: value
+
   defp safe_to_atom(value) do
-    try do
-      if is_atom(value) do
-        value
-      else
-        String.to_existing_atom(value)
-      end
-    rescue
-      ArgumentError -> String.to_atom(value)
-    end
+    String.to_existing_atom(value)
+  rescue
+    ArgumentError -> String.to_atom(value)
   end
 
   defp included(_func, _arity, nil), do: true
@@ -81,21 +77,22 @@ defmodule ExExport do
   defp not_excluded(_func, _arity, nil), do: true
 
   defp not_excluded(func, arity, exclude) do
-    if  found?(func, arity, exclude), do: false, else: true
-
+    if found?(func, arity, exclude), do: false, else: true
   end
 
   defp found?(func, arity, list) do
-    result = list
-             |> Enum.find_index(
-                  fn {f, a} ->
-                    f == func and a == arity
-                  end
-                )
-             |> is_nil
+    result =
+      list
+      |> Enum.find_index(fn {f, a} ->
+        f == func and a == arity
+      end)
+      |> is_nil
+
     !result
   end
+
   defp build_args(0), do: []
+
   defp build_args(arity) do
     Enum.to_list(1..arity)
     |> Enum.map(fn idx -> "arg#{idx}" end)
@@ -105,6 +102,7 @@ defmodule ExExport do
     str_args = Enum.join(args, ",")
     {:ok, func_args} = Code.string_to_quoted("#{func}(#{str_args})")
     Logger.debug("defdelegate #{func}(#{str_args}), to: #{resolved_module}")
+
     quote do
       defdelegate unquote(func_args), to: unquote(resolved_module)
     end
@@ -114,6 +112,7 @@ defmodule ExExport do
     str_args = Enum.join(args, ",")
     Logger.debug("def #{func}(#{str_args}), do: #{resolved_module}.#{func}(#{str_args})")
     {:ok, func_args} = Code.string_to_quoted("#{func}(#{str_args})")
+
     quote do
       def unquote(func_args), do: unquote(resolved_module).unquote(func_args)
     end
