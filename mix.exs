@@ -4,7 +4,7 @@ defmodule ExExport.MixProject do
   def project do
     [
       app: :ex_export,
-      version: @version,
+      version: version(),
       elixir: "~> 1.10",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
@@ -14,7 +14,7 @@ defmodule ExExport.MixProject do
       description: description(),
       extra_applications: [:logger],
       docs: [
-        source_ref: "v#{@version}",
+        source_ref: "v#{version()}",
         main: "readme",
         extras: ["README.md", "LICENSE.md"]
       ]
@@ -65,8 +65,9 @@ defmodule ExExport.MixProject do
   def version(), do: @version
   defp aliases do
     [
-      tag:
-        "cmd git tag -a v#{version()} -m 'Version #{version()}';cmd git push origin v#{version()}",
+      tag: "cmd echo \" git tag -a v#{version()} -m 'Version #{version()}'\"",
+      push_tag: "git push origin v#{version()}",
+      tags: "cmd git tag --list 'v*'",
       prettier: "format \"mix.exs\" \"{lib,test}/**/*.{ex,exs}\""
     ]
   end
