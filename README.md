@@ -64,7 +64,7 @@ The package can be installed by adding `ex_export` to your list of dependencies 
 ```elixir
 def deps do
   [
-    {:ex_export, "~> 0.3.2"}
+    {:ex_export, "~> 0.3.3"}
   ]
 end
 ```

@@ -1,6 +1,6 @@
 defmodule ExExport.MixProject do
   use Mix.Project
-  @version "0.3.2"
+  @version "0.3.3"
   def project do
     [
       app: :ex_export,
@@ -65,8 +65,7 @@ defmodule ExExport.MixProject do
   def version(), do: @version
   defp aliases do
     [
-      tag: "cmd echo \" git tag -a v#{version()} -m 'Version #{version()}'\"",
-      push_tag: "git push origin v#{version()}",
+      tag: "cmd  git tag -a v#{version()} -m \\'Version #{version()}\\' ;git push origin v#{version()}",
       tags: "cmd git tag --list 'v*'",
       prettier: "format \"mix.exs\" \"{lib,test}/**/*.{ex,exs}\""
     ]
