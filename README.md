@@ -42,15 +42,29 @@ This option allows you to set a list of specific functions/arity to include
 ## :exclude
 This includes all public functions except the ones matching the list of function/arity
 
+## :delegate
+true means that it will use defdelegate - false it builds a local function and maps it manually.
+I added this to see the difference between a delegate and a simple def. 
+
+## See the Output
+In the configuration file for the environment you wish to render the
+data attributes, you can set the `show_definitions`  to true. This
+will output the code that is being injected in a readable form. This can be useful
+if you get warnings like (Cannot match because already defined)
+
+```elixir
+config :ex_export, :show_definitions, true
+  ```
+
+
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `ex_export` to your list of dependencies in `mix.exs`:
+The package can be installed by adding `ex_export` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
   [
-    {:ex_export, "~> 0.1.0"}
+    {:ex_export, "~> 0.3.2"}
   ]
 end
 ```

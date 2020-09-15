@@ -1,9 +1,11 @@
 defmodule ExExport do
+  @show_definitions  Application.get_env(:ex_export, :show_definitions, false)
+
   @moduledoc """
   This module inspects another module for public functions and generates the defdelegate needed to add them to the local modules name space
   """
 
-  require Logger
+
 
   @doc """
     require in the module and them call export for each module you want to import.
@@ -23,6 +25,16 @@ defmodule ExExport do
         builds a local function and maps it manually.
 
 
+   ## See the Output
+  In the configuration file for the environment you wish to render the
+  data attributes, you can set the `show_definitions`  to true. This
+  will output the code that is being injected in a readable form. This can be useful
+  if you get warnings like (Cannot match because already defined)
+
+    ```elixir
+    config :ex_export, :show_definitions, true
+  ```
+
   """
   defmacro export(module, opts \\ []) do
     resolved_module = Macro.expand(module, __CALLER__)
@@ -36,7 +48,7 @@ defmodule ExExport do
         message: ":only and :exclude are mutually exclusive"
     end
 
-    Logger.debug("<<<<< Exporting To #{inspect(__CALLER__.context_modules)}>>>>")
+   ExExport.output_definition("<<<<< Exporting To #{inspect(__CALLER__.context_modules)}>>>>")
 
     resolved_module.__info__(:functions)
     |> Enum.map(fn {func, arity} ->
@@ -47,9 +59,18 @@ defmodule ExExport do
           use_def(func, build_args(arity), resolved_module)
         end
       else
-        Logger.debug("Skipping #{func}/#{arity}")
+        ExExport.output_definition("Skipping #{func}/#{arity}")
       end
     end)
+  end
+
+
+  def show_definitions?,do: @show_definitions
+  def output_definition(msg) do
+    case show_definitions?()  do
+      true -> IO.puts(msg)
+      _ -> nil
+    end
   end
 
   defp get_keyword(list, label, default \\ nil) do
@@ -57,15 +78,6 @@ defmodule ExExport do
       :error -> default
       {:ok, val} -> val
     end
-  end
-
-  defp safe_to_atom(nil), do: nil
-  defp safe_to_atom(value) when is_atom(value), do: value
-
-  defp safe_to_atom(value) do
-    String.to_existing_atom(value)
-  rescue
-    ArgumentError -> String.to_atom(value)
   end
 
   defp included(_func, _arity, nil), do: true
@@ -101,7 +113,7 @@ defmodule ExExport do
   defp use_delegate(func, args, resolved_module) do
     str_args = Enum.join(args, ",")
     {:ok, func_args} = Code.string_to_quoted("#{func}(#{str_args})")
-    Logger.debug("defdelegate #{func}(#{str_args}), to: #{resolved_module}")
+    output_definition("defdelegate #{func}(#{str_args}), to: #{resolved_module}")
 
     quote do
       defdelegate unquote(func_args), to: unquote(resolved_module)
@@ -110,7 +122,7 @@ defmodule ExExport do
 
   defp use_def(func, args, resolved_module) do
     str_args = Enum.join(args, ",")
-    Logger.debug("def #{func}(#{str_args}), do: #{resolved_module}.#{func}(#{str_args})")
+    output_definition("def #{func}(#{str_args}), do: #{resolved_module}.#{func}(#{str_args})")
     {:ok, func_args} = Code.string_to_quoted("#{func}(#{str_args})")
 
     quote do
