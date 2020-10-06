@@ -1,3 +1,23 @@
 Add support for github actions and change log generation
+
+
+Add support for having a module with a stanard method
+
+defmodule MyMethod do
+  def execute(a)  do
+  end
+end
+
+defmoulde Top do
+require ExExport
+ExExport.export(MyMethod, method: :execute)
+end
+This will pull in the module and change the execute method to be named based on the module so you
+call 
+
+Top.my_method(a)
+
+#this would support the pattern I use in anothe rproject
+
 https://hexdocs.pm/flex_logger/FlexLogger.html
 Add typespecs and dialyzer
