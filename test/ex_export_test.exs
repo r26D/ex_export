@@ -7,7 +7,8 @@ defmodule ExExportTest do
     Farewell,
     Greet,
     NotDelegate,
-    OnlySomeAction
+    OnlySomeAction,
+    HasPrivateMethod
   }
 
   test "Greet in the module" do
@@ -69,5 +70,18 @@ defmodule ExExportTest do
     assert Sample.not_delegated() == "Hello world!"
     assert Sample.not_delegated("bob") == "Hello world bob!"
     assert Sample.not_delegated_list(1, 2, 3) == [1, 2, 3]
+  end
+
+  test "auto filters private methods" do
+    assert Sample.public_action() == "public"
+    # assert Sample._private_action() == "_private_action"
+    # assert Sample.__private_action() == "__private_action"
+    assert_raise UndefinedFunctionError, fn ->
+      Sample._private_action() == "_private_action"
+    end
+
+    assert_raise UndefinedFunctionError, fn ->
+      Sample.__private_action() == "__private_action"
+    end
   end
 end

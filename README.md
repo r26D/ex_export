@@ -34,7 +34,8 @@ defmodule API do
 end      
 ```
 
-This adds defdelegate for all public methods in the referenced files.
+This adds defdelegate for all public methods in the referenced files. It does filter out
+any methods that start with an underscore so a method called _app_name or __info__  would be auto excluded.
 
 ## :only
 This option allows you to set a list of specific functions/arity to include

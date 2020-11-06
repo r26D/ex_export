@@ -1,14 +1,14 @@
 defmodule ExExport do
-  @show_definitions  Application.get_env(:ex_export, :show_definitions, false)
+  @show_definitions Application.get_env(:ex_export, :show_definitions, false)
 
   @moduledoc """
   This module inspects another module for public functions and generates the defdelegate needed to add them to the local modules name space
   """
 
-
-
   @doc """
     require in the module and them call export for each module you want to import.
+    The function list automatically filters out functions that start with an underscore
+
     ## Examples
     defmodule Sample do
       require ExExport
@@ -48,11 +48,12 @@ defmodule ExExport do
         message: ":only and :exclude are mutually exclusive"
     end
 
-   ExExport.output_definition("<<<<< Exporting To #{inspect(__CALLER__.context_modules)}>>>>")
+    ExExport.output_definition("<<<<< Exporting To #{inspect(__CALLER__.context_modules)}>>>>")
 
     resolved_module.__info__(:functions)
     |> Enum.map(fn {func, arity} ->
-      if included(func, arity, only) && not_excluded(func, arity, exclude) do
+      if not private_func(func) and included(func, arity, only) and
+           not_excluded(func, arity, exclude) do
         if delegate do
           use_delegate(func, build_args(arity), resolved_module)
         else
@@ -64,10 +65,10 @@ defmodule ExExport do
     end)
   end
 
+  def show_definitions?, do: @show_definitions
 
-  def show_definitions?,do: @show_definitions
   def output_definition(msg) do
-    case show_definitions?()  do
+    case show_definitions?() do
       true -> IO.puts(msg)
       _ -> nil
     end
@@ -78,6 +79,10 @@ defmodule ExExport do
       :error -> default
       {:ok, val} -> val
     end
+  end
+
+  defp private_func(func) do
+    String.at("#{func}", 0) == "_"
   end
 
   defp included(_func, _arity, nil), do: true

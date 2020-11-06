@@ -1,6 +1,6 @@
 defmodule ExExport.MixProject do
   use Mix.Project
-  @version "0.3.3"
+  @version "0.4.0"
   def project do
     [
       app: :ex_export,
@@ -63,9 +63,13 @@ defmodule ExExport.MixProject do
   end
 
   def version(), do: @version
+
   defp aliases do
     [
-      tag: "cmd  git tag -a v#{version()} -m \\'Version #{version()}\\' ;git push origin v#{version()}",
+      tag:
+        "cmd  git tag -a v#{version()} -m \\'Version #{version()}\\' ;git push origin v#{
+          version()
+        }",
       tags: "cmd git tag --list 'v*'",
       publish: "cmd echo \$HEX_LOCAL_PASSWORD | mix hex.publish --yes",
       prettier: "format \"mix.exs\" \"{lib,test}/**/*.{ex,exs}\""
