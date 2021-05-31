@@ -35,7 +35,7 @@ end
 ```
 
 This adds defdelegate for all public methods in the referenced files. It does filter out
-any methods that start with an underscore so a method called _app_name or __info__  would be auto excluded.
+any methods that start with an underscore so that a method called _app_name or __info__  would be auto excluded.
 
 ## :only
 This option allows you to set a list of specific functions/arity to include
@@ -45,7 +45,8 @@ This includes all public functions except the ones matching the list of function
 
 ## :delegate
 true means that it will use defdelegate - false it builds a local function and maps it manually.
-I added this to see the difference between a delegate and a simple def. 
+The default is currently false (as of 0.5.0).  As of Elixir 1.11 defdelegate is a compile time dependency. 
+By switching it to false, it should reduce the amount of recompilation.
 
 ## See the Output
 In the configuration file for the environment you wish to render the

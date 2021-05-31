@@ -21,7 +21,7 @@ defmodule ExExport do
   ## Options
     * `:only` - (since v0.2.0) a list of [function: arity] only matching functions will be delegated
     * `:exclude` - (since v0.2.0) a list of [function: arity]  matching functions will *NOT* be delegated
-    * `:delegate` - (since v0.3.0) true/false default true - true means that it will use defdelegate - false it
+    * `:delegate` - (since v0.3.0) (default false) true/false default true - true means that it will use defdelegate - false it
         builds a local function and maps it manually.
 
 
@@ -39,7 +39,7 @@ defmodule ExExport do
   defmacro export(module, opts \\ []) do
     resolved_module = Macro.expand(module, __CALLER__)
 
-    delegate = get_keyword(opts, :delegate, true)
+    delegate = get_keyword(opts, :delegate, false)
     only = get_keyword(opts, :only)
     exclude = get_keyword(opts, :exclude)
 
