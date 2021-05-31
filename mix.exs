@@ -9,7 +9,6 @@ defmodule ExExport.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      licenses: ["MIT"],
       aliases: aliases(),
       package: package(),
       description: description(),
@@ -70,7 +69,7 @@ defmodule ExExport.MixProject do
       tag:
         "cmd  git tag -a v#{version()} -m \\'Version #{version()}\\' ;git push origin v#{version()}",
       tags: "cmd git tag --list 'v*'",
-      publish: "cmd echo \$HEX_LOCAL_PASSWORD | mix hex.publish --yes",
+      publish: "cmd echo '\$HEX_LOCAL_PASSWORD' | mix hex.publish --yes",
       prettier: "format \"mix.exs\" \"{lib,test}/**/*.{ex,exs}\""
     ]
   end
