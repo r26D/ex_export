@@ -9,6 +9,7 @@ defmodule ExExport.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
+      licenses: ["MIT"],
       aliases: aliases(),
       package: package(),
       description: description(),
