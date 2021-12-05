@@ -37,8 +37,14 @@ defmodule ExExport do
 
   """
   defmacro export(module, opts \\ []) do
-    resolved_module = Macro.expand(module, __CALLER__)
+  #  resolved_module = Macro.expand(module, __CALLER__)
+    resolved_module = case module do
+      {:__aliases__, _, parts} -> ["Elixir" | parts]
+                                  |> Enum.join(".")
+                                  |> String.to_atom()
 
+      _ -> raise "Don't know how to handle #{inspect(module)}"
+    end
 
     only = get_keyword(opts, :only)
     exclude = get_keyword(opts, :exclude)
