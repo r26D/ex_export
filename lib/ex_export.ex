@@ -39,7 +39,7 @@ defmodule ExExport do
   defmacro export(module, opts \\ []) do
     resolved_module = Macro.expand(module, __CALLER__)
 
-    delegate = get_keyword(opts, :delegate, false)
+
     only = get_keyword(opts, :only)
     exclude = get_keyword(opts, :exclude)
 
@@ -54,11 +54,7 @@ defmodule ExExport do
     |> Enum.map(fn {func, arity} ->
       if not private_func(func) and included(func, arity, only) and
            not_excluded(func, arity, exclude) do
-        if delegate do
           use_delegate(func, build_args(arity), resolved_module)
-        else
-          use_def(func, build_args(arity), resolved_module)
-        end
       else
         ExExport.output_definition("Skipping #{func}/#{arity}")
       end
@@ -125,13 +121,5 @@ defmodule ExExport do
     end
   end
 
-  defp use_def(func, args, resolved_module) do
-    str_args = Enum.join(args, ",")
-    output_definition("def #{func}(#{str_args}), do: #{resolved_module}.#{func}(#{str_args})")
-    {:ok, func_args} = Code.string_to_quoted("#{func}(#{str_args})")
 
-    quote do
-      def unquote(func_args), do: unquote(resolved_module).unquote(func_args)
-    end
-  end
 end
