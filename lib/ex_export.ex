@@ -36,33 +36,50 @@ defmodule ExExport do
   ```
 
   """
-  defmacro export(module, opts \\ []) do
-    resolved_module = Macro.expand(module, __CALLER__)
 
-    delegate = get_keyword(opts, :delegate, false)
+
+  defmacro export(module, opts \\ []) do
+    #  resolved_module = Macro.expand(module, __CALLER__)
+    resolved_module = case module do
+      {:__aliases__, _, parts} ->
+        resolve_module_name(parts, __CALLER__.aliases)
+
+
+      _ -> raise "Don't know how to handle #{inspect(module)}"
+    end
+
+    # IO.inspect(module,label: "Original Module")
+    # IO.inspect(__CALLER__.aliases, label: "Caller")
     only = get_keyword(opts, :only)
     exclude = get_keyword(opts, :exclude)
 
     if exclude && only do
       raise ArgumentError,
-        message: ":only and :exclude are mutually exclusive"
+            message: ":only and :exclude are mutually exclusive"
     end
 
     ExExport.output_definition("<<<<< Exporting To #{inspect(__CALLER__.context_modules)}>>>>")
 
-    resolved_module.__info__(:functions)
-    |> Enum.map(fn {func, arity} ->
-      if not private_func(func) and included(func, arity, only) and
-           not_excluded(func, arity, exclude) do
-        if delegate do
-          use_delegate(func, build_args(arity), resolved_module)
-        else
-          use_def(func, build_args(arity), resolved_module)
-        end
-      else
-        ExExport.output_definition("Skipping #{func}/#{arity}")
-      end
-    end)
+    try do
+      resolved_module.__info__(:functions)
+      |> Enum.map(
+           fn {func, arity} ->
+             if not private_func(func) and included(func, arity, only) and
+                not_excluded(func, arity, exclude) do
+               use_delegate(func, build_args(arity), resolved_module)
+             else
+               ExExport.output_definition("Skipping #{func}/#{arity}")
+             end
+           end
+         )
+    rescue
+      e in UndefinedFunctionError ->
+        IO.puts(
+          "ExExport doesn't support aliasing - you must use the canonical name of the module.
+       This prevents the need for a compile time dependency."
+        )
+        raise e
+    end
   end
 
   def show_definitions?, do: @show_definitions
@@ -72,6 +89,36 @@ defmodule ExExport do
       true -> IO.puts(msg)
       _ -> nil
     end
+  end
+
+  defp resolve_module_name(parts, aliases) do
+   # IO.inspect(parts,  label: "Parts")
+   # IO.inspect(aliases, label: "Aliases")
+    cond do
+      Enum.count(aliases) > 0 && Enum.count(parts) == 1 ->
+        case find_alias(Enum.at(parts, 0), aliases) do
+          nil -> Enum.at(parts, 0)
+          result -> result
+        end
+      true ->
+        ["Elixir" | parts]
+        |> Enum.join(".")
+        |> String.to_atom()
+    end
+  end
+
+  defp find_alias(key, aliases) do
+    case Enum.find(
+           aliases,
+           fn {alias_key, _module} ->
+        #    IO.puts("Comparing #{key} to #{alias_key}")
+             "Elixir.#{key}" == "#{alias_key}"
+           end
+         ) do
+      nil -> nil
+      {_, module} -> module
+    end
+
   end
 
   defp get_keyword(list, label, default \\ nil) do
@@ -100,9 +147,11 @@ defmodule ExExport do
   defp found?(func, arity, list) do
     result =
       list
-      |> Enum.find_index(fn {f, a} ->
-        f == func and a == arity
-      end)
+      |> Enum.find_index(
+           fn {f, a} ->
+             f == func and a == arity
+           end
+         )
       |> is_nil
 
     !result
@@ -125,13 +174,5 @@ defmodule ExExport do
     end
   end
 
-  defp use_def(func, args, resolved_module) do
-    str_args = Enum.join(args, ",")
-    output_definition("def #{func}(#{str_args}), do: #{resolved_module}.#{func}(#{str_args})")
-    {:ok, func_args} = Code.string_to_quoted("#{func}(#{str_args})")
 
-    quote do
-      def unquote(func_args), do: unquote(resolved_module).unquote(func_args)
-    end
-  end
 end

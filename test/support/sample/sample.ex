@@ -3,7 +3,7 @@ defmodule Sample do
   This is a sample for a top level barrel
   """
   require ExExport
-  alias Sample.Actions.Greet
+  alias Sample.Actions.Greet, warn: false
 
   ExExport.export(Greet)
   ExExport.export(Sample.Actions.Farewell)

@@ -9,7 +9,7 @@ defmodule ExExportTest do
     NotDelegate,
     OnlySomeAction,
     HasPrivateMethod
-  }
+  }, warn: false
 
   test "Greet in the module" do
     assert Greet.hello() == "Hello world!"

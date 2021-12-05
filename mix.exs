@@ -1,6 +1,6 @@
 defmodule ExExport.MixProject do
   use Mix.Project
-  @version "0.5.1"
+  @version "0.8.0"
   def project do
     [
       app: :ex_export,
@@ -55,10 +55,10 @@ defmodule ExExport.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:credo, "~> 1.4", only: [:dev, :test], runtime: false},
+      {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
-      {:mix_test_watch, "~> 1.0.2", only: :dev, runtime: false},
-      {:ex_unit_notifier, "~> 0.1", only: :test}
+      {:mix_test_watch, "~> 1.1", only: :dev, runtime: false},
+      {:ex_unit_notifier, "~> 1.2", only: :test}
     ]
   end
 
