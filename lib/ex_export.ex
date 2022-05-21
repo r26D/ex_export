@@ -51,7 +51,7 @@ defmodule ExExport do
     |> Enum.map(fn {func, arity} ->
       if not private_func(func) and included(func, arity, only) and
            not_excluded(func, arity, exclude) do
-          use_delegate(func, build_args(arity), resolved_module)
+        use_delegate(func, build_args(arity), resolved_module)
       else
         ExExport.output_definition("Skipping #{func}/#{arity}")
       end
@@ -117,6 +117,4 @@ defmodule ExExport do
       defdelegate unquote(func_args), to: unquote(resolved_module)
     end
   end
-
-
 end

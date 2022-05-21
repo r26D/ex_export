@@ -74,8 +74,9 @@ defmodule ExExportTest do
 
   test "auto filters private methods" do
     assert Sample.public_action() == "public"
-     assert HasPrivateMethod._private_action() == "_private_action"
-     assert HasPrivateMethod.__private_action() == "__private_action"
+    assert HasPrivateMethod._private_action() == "_private_action"
+    assert HasPrivateMethod.__private_action() == "__private_action"
+
     assert_raise UndefinedFunctionError, fn ->
       Sample._private_action() == "_private_action"
     end
