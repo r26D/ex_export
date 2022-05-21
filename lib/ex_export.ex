@@ -21,8 +21,7 @@ defmodule ExExport do
   ## Options
     * `:only` - (since v0.2.0) a list of [function: arity] only matching functions will be delegated
     * `:exclude` - (since v0.2.0) a list of [function: arity]  matching functions will *NOT* be delegated
-    * `:delegate` - (since v0.3.0) (default false) true/false default true - true means that it will use defdelegate - false it
-        builds a local function and maps it manually.
+
 
 
    ## See the Output
@@ -37,15 +36,7 @@ defmodule ExExport do
 
   """
   defmacro export(module, opts \\ []) do
-  #  resolved_module = Macro.expand(module, __CALLER__)
-    resolved_module = case module do
-      {:__aliases__, _, parts} -> ["Elixir" | parts]
-                                  |> Enum.join(".")
-                                  |> String.to_atom()
-
-      _ -> raise "Don't know how to handle #{inspect(module)}"
-    end
-
+    resolved_module = Macro.expand(module, __CALLER__)
     only = get_keyword(opts, :only)
     exclude = get_keyword(opts, :exclude)
 

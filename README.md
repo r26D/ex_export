@@ -43,10 +43,7 @@ This option allows you to set a list of specific functions/arity to include
 ## :exclude
 This includes all public functions except the ones matching the list of function/arity
 
-## :delegate
-true means that it will use defdelegate - false it builds a local function and maps it manually.
-The default is currently false (as of 0.5.0).  As of Elixir 1.11 defdelegate is a compile time dependency. 
-By switching it to false, it should reduce the amount of recompilation.
+
 
 ## See the Output
 In the configuration file for the environment you wish to render the
