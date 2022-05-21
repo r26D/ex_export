@@ -43,6 +43,15 @@ This option allows you to set a list of specific functions/arity to include
 ## :exclude
 This includes all public functions except the ones matching the list of function/arity
 
+## :expansion
+This can be :manual or :macro. Default is :manual
+
+:macro - use Macro.expand. This seems to generate a compile time dependency
+:manual - uses custom code to figure out the alias resolution -which prevents the compile
+time dependency but can generate a **warning - alias is unused** because we are resolving it. You
+can get rid of the warning by changing to :macro, undoing the alias or adding warn: false to the alias
+
+
 ## See the Output
 In the configuration file for the environment you wish to render the
 data attributes, you can set the `show_definitions`  to true. This

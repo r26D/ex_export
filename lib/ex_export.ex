@@ -21,8 +21,11 @@ defmodule ExExport do
   ## Options
     * `:only` - (since v0.2.0) a list of [function: arity] only matching functions will be delegated
     * `:exclude` - (since v0.2.0) a list of [function: arity]  matching functions will *NOT* be delegated
-    * `:delegate` - (since v0.3.0) (default false) true/false default true - true means that it will use defdelegate - false it
-        builds a local function and maps it manually.
+    * `:expansion` - (since v.0.8.1) :manual or :macro -
+           :macro - use Macro.expand. This seems to generate a compile time dependency
+           :manual - uses custom code to figure out the alias resolution -which prevents the compile
+                     time dependency but can generate a **warning - alias is unused** because we are resolving it. You
+                     can get rid of the warning by changing to :macro, undoing the alias or adding warn: false to the alias
 
 
    ## See the Output
@@ -39,14 +42,9 @@ defmodule ExExport do
 
 
   defmacro export(module, opts \\ []) do
-    #  resolved_module = Macro.expand(module, __CALLER__)
-    resolved_module = case module do
-      {:__aliases__, _, parts} ->
-        resolve_module_name(parts, __CALLER__.aliases)
 
-
-      _ -> raise "Don't know how to handle #{inspect(module)}"
-    end
+    #DJE - changed to a manual method to remove a compile time dependency
+    resolved_module = expand_module(module, __CALLER__,get_keyword(opts, :expansion, :manual))
 
     # IO.inspect(module,label: "Original Module")
     # IO.inspect(__CALLER__.aliases, label: "Caller")
@@ -91,27 +89,25 @@ defmodule ExExport do
     end
   end
 
-  defp resolve_module_name(parts, aliases) do
-   # IO.inspect(parts,  label: "Parts")
-   # IO.inspect(aliases, label: "Aliases")
-    cond do
-      Enum.count(aliases) > 0 && Enum.count(parts) == 1 ->
-        case find_alias(Enum.at(parts, 0), aliases) do
-          nil -> Enum.at(parts, 0)
-          result -> result
-        end
-      true ->
-        ["Elixir" | parts]
-        |> Enum.join(".")
-        |> String.to_atom()
+  def expand_module(module, caller, method \\ :manual)
+  def expand_module(module, caller, :macro) do
+    Macro.expand(module, caller)
+  end
+  def expand_module(module, caller, :manual) do
+    #   IO.inspect(module, label: "MOdule")
+    #  IO.inspect(caller.aliases, label: "Caller Aliaases")
+    case module do
+      {:__aliases__, _, parts} ->
+        resolve_module_name(parts, caller.aliases)
+
+      _ -> raise "Don't know how to handle #{inspect(module)}"
     end
   end
-
   defp find_alias(key, aliases) do
     case Enum.find(
            aliases,
            fn {alias_key, _module} ->
-        #    IO.puts("Comparing #{key} to #{alias_key}")
+             #  IO.puts("Comparing #{key} to #{alias_key}")
              "Elixir.#{key}" == "#{alias_key}"
            end
          ) do
@@ -119,6 +115,39 @@ defmodule ExExport do
       {_, module} -> module
     end
 
+  end
+  defp resolve_module_name(parts, aliases) do
+    #  IO.inspect(parts, label: "Parts")
+    #  IO.inspect(aliases, label: "Aliases")
+    cond do
+      Enum.count(aliases) > 0 ->
+        [head | rest] = parts
+        case find_alias(head, aliases) do
+          nil -> parts
+          result ->
+            [
+              result
+              |> Atom.to_string()
+              |> String.split(".")
+              |> List.wrap(),
+              rest
+            ]
+            |> List.flatten()
+            |> Enum.reject(&is_nil/1)
+        end
+      true -> parts
+    end
+    |> then(
+         fn list ->
+           case Enum.at(list, 0) do
+             "Elixir" -> list
+             :Elixir -> list
+             _ -> ["Elixir" | parts]
+           end
+         end
+       )
+    |> Enum.join(".")
+    |> String.to_atom()
   end
 
   defp get_keyword(list, label, default \\ nil) do
