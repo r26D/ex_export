@@ -46,8 +46,8 @@ This includes all public functions except the ones matching the list of function
 ## :expansion
 This can be :manual or :macro. Default is :manual
 
-:macro - use Macro.expand. This seems to generate a compile time dependency
-:manual - uses custom code to figure out the alias resolution -which prevents the compile
+* :macro - use Macro.expand. This seems to generate a compile time dependency
+* :manual - uses custom code to figure out the alias resolution -which prevents the compile
 time dependency but can generate a **warning - alias is unused** because we are resolving it. You
 can get rid of the warning by changing to :macro, undoing the alias or adding warn: false to the alias
 
@@ -70,7 +70,7 @@ The package can be installed by adding `ex_export` to your list of dependencies 
 ```elixir
 def deps do
   [
-    {:ex_export, "~> 0.8.0"}
+    {:ex_export, "~> 0.8.2"}
   ]
 end
 ```
