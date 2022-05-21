@@ -40,11 +40,9 @@ defmodule ExExport do
 
   """
 
-
   defmacro export(module, opts \\ []) do
-
-    #DJE - changed to a manual method to remove a compile time dependency
-    resolved_module = expand_module(module, __CALLER__,get_keyword(opts, :expansion, :manual))
+    # DJE - changed to a manual method to remove a compile time dependency
+    resolved_module = expand_module(module, __CALLER__, get_keyword(opts, :expansion, :manual))
 
     # IO.inspect(module,label: "Original Module")
     # IO.inspect(__CALLER__.aliases, label: "Caller")
@@ -53,29 +51,28 @@ defmodule ExExport do
 
     if exclude && only do
       raise ArgumentError,
-            message: ":only and :exclude are mutually exclusive"
+        message: ":only and :exclude are mutually exclusive"
     end
 
     ExExport.output_definition("<<<<< Exporting To #{inspect(__CALLER__.context_modules)}>>>>")
 
     try do
       resolved_module.__info__(:functions)
-      |> Enum.map(
-           fn {func, arity} ->
-             if not private_func(func) and included(func, arity, only) and
-                not_excluded(func, arity, exclude) do
-               use_delegate(func, build_args(arity), resolved_module)
-             else
-               ExExport.output_definition("Skipping #{func}/#{arity}")
-             end
-           end
-         )
+      |> Enum.map(fn {func, arity} ->
+        if not private_func(func) and included(func, arity, only) and
+             not_excluded(func, arity, exclude) do
+          use_delegate(func, build_args(arity), resolved_module)
+        else
+          ExExport.output_definition("Skipping #{func}/#{arity}")
+        end
+      end)
     rescue
       e in UndefinedFunctionError ->
         IO.puts(
           "ExExport doesn't support aliasing - you must use the canonical name of the module.
        This prevents the need for a compile time dependency."
         )
+
         raise e
     end
   end
@@ -90,9 +87,11 @@ defmodule ExExport do
   end
 
   def expand_module(module, caller, method \\ :manual)
+
   def expand_module(module, caller, :macro) do
     Macro.expand(module, caller)
   end
+
   def expand_module(module, caller, :manual) do
     #   IO.inspect(module, label: "MOdule")
     #  IO.inspect(caller.aliases, label: "Caller Aliaases")
@@ -100,9 +99,11 @@ defmodule ExExport do
       {:__aliases__, _, parts} ->
         resolve_module_name(parts, caller.aliases)
 
-      _ -> raise "Don't know how to handle #{inspect(module)}"
+      _ ->
+        raise "Don't know how to handle #{inspect(module)}"
     end
   end
+
   defp find_alias(key, aliases) do
     case Enum.find(
            aliases,
@@ -114,16 +115,19 @@ defmodule ExExport do
       nil -> nil
       {_, module} -> module
     end
-
   end
+
   defp resolve_module_name(parts, aliases) do
     #  IO.inspect(parts, label: "Parts")
     #  IO.inspect(aliases, label: "Aliases")
     cond do
       Enum.count(aliases) > 0 ->
         [head | rest] = parts
+
         case find_alias(head, aliases) do
-          nil -> parts
+          nil ->
+            parts
+
           result ->
             [
               result
@@ -135,17 +139,17 @@ defmodule ExExport do
             |> List.flatten()
             |> Enum.reject(&is_nil/1)
         end
-      true -> parts
+
+      true ->
+        parts
     end
-    |> then(
-         fn list ->
-           case Enum.at(list, 0) do
-             "Elixir" -> list
-             :Elixir -> list
-             _ -> ["Elixir" | parts]
-           end
-         end
-       )
+    |> then(fn list ->
+      case Enum.at(list, 0) do
+        "Elixir" -> list
+        :"Elixir" -> list
+        _ -> ["Elixir" | parts]
+      end
+    end)
     |> Enum.join(".")
     |> String.to_atom()
   end
@@ -176,11 +180,9 @@ defmodule ExExport do
   defp found?(func, arity, list) do
     result =
       list
-      |> Enum.find_index(
-           fn {f, a} ->
-             f == func and a == arity
-           end
-         )
+      |> Enum.find_index(fn {f, a} ->
+        f == func and a == arity
+      end)
       |> is_nil
 
     !result
@@ -202,6 +204,4 @@ defmodule ExExport do
       defdelegate unquote(func_args), to: unquote(resolved_module)
     end
   end
-
-
 end

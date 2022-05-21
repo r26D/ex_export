@@ -3,13 +3,14 @@ defmodule ExExportTest do
   doctest ExExport
 
   alias Sample.Actions.{
-    AllButAction,
-    Farewell,
-    Greet,
-    NotDelegate,
-    OnlySomeAction,
-    HasPrivateMethod
-  }, warn: false
+          AllButAction,
+          Farewell,
+          Greet,
+          NotDelegate,
+          OnlySomeAction,
+          HasPrivateMethod
+        },
+        warn: false
 
   test "Greet in the module" do
     assert Greet.hello() == "Hello world!"
