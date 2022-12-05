@@ -1,5 +1,5 @@
 defmodule ExExport do
-  @show_definitions Application.get_env(:ex_export, :show_definitions, false)
+  @show_definitions Application.compile_env(:ex_export, :show_definitions, false)
 
   @moduledoc """
   This module inspects another module for public functions and generates the defdelegate needed to add them to the local modules name space
