@@ -46,26 +46,33 @@ defmodule ExExport do
 
     # IO.inspect(module,label: "Original Module")
     # IO.inspect(__CALLER__.aliases, label: "Caller")
+    #    IO.inspect(opts)
     only = get_keyword(opts, :only)
-    exclude = get_keyword(opts, :exclude)
+    exclude = case get_keyword(opts, :exclude) do
+      nil -> nil
+      exclude -> excluded_as_attribute(exclude, __CALLER__)
+    end
 
+    IO.inspect(exclude, label: "Exclude")
     if exclude && only do
       raise ArgumentError,
-        message: ":only and :exclude are mutually exclusive"
+            message: ":only and :exclude are mutually exclusive"
     end
 
     ExExport.output_definition("<<<<< Exporting To #{inspect(__CALLER__.context_modules)}>>>>")
 
     try do
       resolved_module.__info__(:functions)
-      |> Enum.map(fn {func, arity} ->
-        if not private_func(func) and included(func, arity, only) and
-             not_excluded(func, arity, exclude) do
-          use_delegate(func, build_args(arity), resolved_module)
-        else
-          ExExport.output_definition("Skipping #{func}/#{arity}")
-        end
-      end)
+      |> Enum.map(
+           fn {func, arity} ->
+             if not private_func(func) and included(func, arity, only) and
+                not_excluded(func, arity, exclude) do
+               use_delegate(func, build_args(arity), resolved_module)
+             else
+               ExExport.output_definition("Skipping #{func}/#{arity}")
+             end
+           end
+         )
     rescue
       e in UndefinedFunctionError ->
         IO.puts(
@@ -77,6 +84,22 @@ defmodule ExExport do
     end
   end
 
+  def excluded_as_attribute({:@, _, [{label, _, _}]},caller) do
+    result = Module.get_attribute(caller.module, label)
+    IO.inspect(label, label: "Lbael")
+    IO.inspect(result, label: "Result")
+    result
+  end
+  def excluded_as_attribute({method, codeline, env},caller) do
+    result = Code.eval_quoted({method, codeline,env}, caller)
+  
+    IO.inspect(result, label: "Result")
+    result
+  end
+  def excluded_as_attribute(v,_) do
+    IO.inspect(v, label: "V")
+    v
+  end
   def show_definitions?, do: @show_definitions
 
   def output_definition(msg) do
@@ -143,13 +166,15 @@ defmodule ExExport do
       true ->
         parts
     end
-    |> then(fn list ->
-      case Enum.at(list, 0) do
-        "Elixir" -> list
-        :"Elixir" -> list
-        _ -> ["Elixir" | parts]
-      end
-    end)
+    |> then(
+         fn list ->
+           case Enum.at(list, 0) do
+             "Elixir" -> list
+             :"Elixir" -> list
+             _ -> ["Elixir" | parts]
+           end
+         end
+       )
     |> Enum.join(".")
     |> String.to_atom()
   end
@@ -180,9 +205,11 @@ defmodule ExExport do
   defp found?(func, arity, list) do
     result =
       list
-      |> Enum.find_index(fn {f, a} ->
-        f == func and a == arity
-      end)
+      |> Enum.find_index(
+           fn {f, a} ->
+             f == func and a == arity
+           end
+         )
       |> is_nil
 
     !result

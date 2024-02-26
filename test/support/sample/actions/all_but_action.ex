@@ -13,4 +13,9 @@ defmodule Sample.Actions.AllButAction do
   def all_but_action2(name) do
     "action2 #{name}!"
   end
+
+  def all_but_action3(name) do
+    "action3 #{name}!"
+  end
+  
 end

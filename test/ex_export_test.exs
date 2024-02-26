@@ -8,7 +8,8 @@ defmodule ExExportTest do
           Greet,
           NotDelegate,
           OnlySomeAction,
-          HasPrivateMethod
+          HasPrivateMethod,
+  ExcludeFromAttribute
         },
         warn: false
 
@@ -37,19 +38,27 @@ defmodule ExExportTest do
     assert Sample.goodbye("Bob") == "Goodbye Bob!"
   end
 
-  test "able to exclude functions from the export" do
-    assert AllButAction.all_but_action1() == "action1"
-    assert AllButAction.all_but_action1("bob") == "action1 bob!"
-    assert AllButAction.all_but_action2("bob") == "action2 bob!"
+  test "able to exclude functions from the export using an attribute" do
+    assert ExcludeFromAttribute.exclude_from_attribute1() == "action1"
+    assert ExcludeFromAttribute.exclude_from_attribute1("bob") == "action1 bob!"
+    assert ExcludeFromAttribute.exclude_from_attribute2("bob") == "action2 bob!"
+    assert ExcludeFromAttribute.exclude_from_attribute3("bob") == "action3 bob!"
 
-    assert Sample.all_but_action1() == "action1"
+    IO.inspect(Sample.__info__(:functions))
 
     assert_raise UndefinedFunctionError, fn ->
-      Sample.all_but_action1("bob") == "action1 bob!"
+      Sample.exclude_from_attribute1("bob") == "action1 bob!"
     end
-
-    assert Sample.all_but_action2("bob") == "action2 bob!"
+    assert_raise UndefinedFunctionError, fn ->
+      Sample.exclude_from_attribute2("bob") == "actio2 bob!"
+    end
+    assert_raise UndefinedFunctionError, fn ->
+      assert Sample.exclude_from_attribute3() == "action3"
+    end
+    Sample.exclude_from_attribute1() == "action1"
+    assert Sample.exclude_from_attribute3("bob") == "action3 bob!"
   end
+
 
   test "able to include only specific functions from the export" do
     assert OnlySomeAction.some_action1() == "action1"
