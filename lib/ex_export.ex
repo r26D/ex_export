@@ -44,9 +44,10 @@ defmodule ExExport do
     # DJE - changed to a manual method to remove a compile time dependency
     resolved_module = expand_module(module, __CALLER__, get_keyword(opts, :expansion, :manual))
 
-    only =  resolve_restriction(get_keyword(opts, :only), __ENV__)
-    exclude =  resolve_restriction(get_keyword(opts, :exclude), __ENV__)
-   
+
+    only = resolve_restriction(get_keyword(opts, :only), __CALLER__)
+    exclude = resolve_restriction(get_keyword(opts, :exclude), __CALLER__)
+
     if exclude && only do
       raise ArgumentError,
             message: ":only and :exclude are mutually exclusive"
@@ -94,7 +95,7 @@ defmodule ExExport do
   end
 
   def expand_module(module, caller, :manual) do
-    #   IO.inspect(module, label: "MOdule")
+    #   IO.inspect(module, label: "MOdule")             R
     #  IO.inspect(caller.aliases, label: "Caller Aliaases")
     case module do
       {:__aliases__, _, parts} ->
@@ -216,7 +217,26 @@ defmodule ExExport do
       is_nil(value) -> nil
       is_list(value) -> value
       true ->
-        value
+        new_ast = Macro.prewalk(
+          value,
+          fn
+            {:__aliases__, meta, [alias]} ->
+              case  Macro.Env.fetch_alias(env, alias)  do
+                {:ok, module} -> result = module
+                                          |> Atom.to_string()
+                                          |> String.split(".")
+                                          |> List.wrap()
+                                          |> Enum.map(fn i -> String.to_existing_atom(i) end)
+                                 {:__aliases__, meta, result}
+                _ -> {:__aliases__, meta, [alias]}
+              end
+
+            other -> other
+          end
+        )
+
+
+        new_ast
         |> Macro.expand(env)
         |> Code.eval_quoted()
         |> then(

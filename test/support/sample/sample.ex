@@ -10,7 +10,7 @@ defmodule Sample do
   @moduledoc """
   This is a sample for a top level barrel
   """
-  require Sample.Defs
+  alias Sample.Defs, warn: false
   require ExExport
 
   alias Sample.Actions.Greet, warn: false
@@ -24,14 +24,14 @@ defmodule Sample do
       all_but_action1: 1
     ]
   )
-  ExExport.export(Sample.Actions.ExcludeFromFunction, exclude: Sample.Defs.exclude_list())
+  ExExport.export(Sample.Actions.ExcludeFromFunction, exclude: Defs.exclude_list())
   ExExport.export(
     Sample.Actions.OnlySomeAction,
     only: [
       some_action1: 1
     ]
   )
-  ExExport.export(Sample.Actions.OnlyFromFunction, only: Sample.Defs.only_list())
+  ExExport.export(Sample.Actions.OnlyFromFunction, only: Defs.only_list())
   ExExport.export(Sample.Actions.NotDelegate, delegate: false)
   ExExport.export(Sample.Actions.HasPrivateMethod)
 end
