@@ -23,13 +23,23 @@ Javascript.
        
 ```elixir
 #api.ex
+defmodule Api.Defs do
+  @moduledoc """
+  This module has to be compiled first so that the function is available in the module scope.
+  """
+  def exclude_list(), do: [exclude_from_function1: 1, exclude_from_function2: 1]
+  def only_list(), do: [only_from_function1: 1, only_from_function2: 1]
+end
+
 defmodule API do
   require ExExport
   alias API.Actions.Welcome
   ExExport.export(Welcome)
   ExExport.export(API.Actions.Farewell)
+  ExExport.export(API.Actions.AllButActionFromFunction,exclude: Api.Defs.exclude_list())
   ExExport.export(API.Actions.AllButAction,exclude: [all_but_action1: 1])
   ExExport.export(API.Actions.OnlySomeAction,only: [some_action1: 1])
+  ExExport.export(API.Actions.OnlySomeActionFromFunction,only: Api.Defs.only_list())
 
 end      
 ```
@@ -38,10 +48,14 @@ This adds defdelegate for all public methods in the referenced files. It filters
 any methods that start with an underscore so that a method called _app_name or __info__  would be auto excluded.
 
 ## :only
-This option allows you to set a list of specific functions/arity to include
+This option allows you to set a list of specific functions/arity to include.
+If you define a function in a separate module you can use that to generate the list of
+function/arity that will be used.
 
 ## :exclude
 This includes all public functions except the ones matching the list of function/arity
+If you define a function in a separate module you can use that to generate the list of
+function/arity that will be used.
 
 ## :expansion
 This can be :manual or :macro. Default is :manual

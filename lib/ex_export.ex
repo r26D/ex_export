@@ -44,16 +44,9 @@ defmodule ExExport do
     # DJE - changed to a manual method to remove a compile time dependency
     resolved_module = expand_module(module, __CALLER__, get_keyword(opts, :expansion, :manual))
 
-    # IO.inspect(module,label: "Original Module")
-    # IO.inspect(__CALLER__.aliases, label: "Caller")
-    #    IO.inspect(opts)
-    only = get_keyword(opts, :only)
-    exclude = case get_keyword(opts, :exclude) do
-      nil -> nil
-      exclude -> excluded_as_attribute(exclude, __CALLER__)
-    end
-
-    IO.inspect(exclude, label: "Exclude")
+    only =  resolve_restriction(get_keyword(opts, :only), __ENV__)
+    exclude =  resolve_restriction(get_keyword(opts, :exclude), __ENV__)
+   
     if exclude && only do
       raise ArgumentError,
             message: ":only and :exclude are mutually exclusive"
@@ -82,24 +75,9 @@ defmodule ExExport do
 
         raise e
     end
+
   end
 
-  def excluded_as_attribute({:@, _, [{label, _, _}]},caller) do
-    result = Module.get_attribute(caller.module, label)
-    IO.inspect(label, label: "Lbael")
-    IO.inspect(result, label: "Result")
-    result
-  end
-  def excluded_as_attribute({method, codeline, env},caller) do
-    result = Code.eval_quoted({method, codeline,env}, caller)
-  
-    IO.inspect(result, label: "Result")
-    result
-  end
-  def excluded_as_attribute(v,_) do
-    IO.inspect(v, label: "V")
-    v
-  end
   def show_definitions?, do: @show_definitions
 
   def output_definition(msg) do
@@ -229,6 +207,25 @@ defmodule ExExport do
 
     quote do
       defdelegate unquote(func_args), to: unquote(resolved_module)
+    end
+  end
+
+  defp resolve_restriction(value, env) do
+
+    cond do
+      is_nil(value) -> nil
+      is_list(value) -> value
+      true ->
+        value
+        |> Macro.expand(env)
+        |> Code.eval_quoted()
+        |> then(
+             fn {result, _} ->
+               result
+             end
+           )
+
+
     end
   end
 end

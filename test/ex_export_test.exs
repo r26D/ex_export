@@ -3,14 +3,15 @@ defmodule ExExportTest do
   doctest ExExport
 
   alias Sample.Actions.{
-          AllButAction,
-          Farewell,
-          Greet,
-          NotDelegate,
-          OnlySomeAction,
-          HasPrivateMethod,
-  ExcludeFromAttribute
-        },
+    AllButAction,
+    Farewell,
+    Greet,
+    NotDelegate,
+    OnlySomeAction,
+    HasPrivateMethod,
+    ExcludeFromFunction,
+    OnlyFromFunction
+    },
         warn: false
 
   test "Greet in the module" do
@@ -38,28 +39,39 @@ defmodule ExExportTest do
     assert Sample.goodbye("Bob") == "Goodbye Bob!"
   end
 
-  test "able to exclude functions from the export using an attribute" do
-    assert ExcludeFromAttribute.exclude_from_attribute1() == "action1"
-    assert ExcludeFromAttribute.exclude_from_attribute1("bob") == "action1 bob!"
-    assert ExcludeFromAttribute.exclude_from_attribute2("bob") == "action2 bob!"
-    assert ExcludeFromAttribute.exclude_from_attribute3("bob") == "action3 bob!"
+  test "able to only functions from the export using an function" do
 
-    IO.inspect(Sample.__info__(:functions))
+    assert OnlyFromFunction.only_from_function1("bob") == "action1 bob!"
+
+
 
     assert_raise UndefinedFunctionError, fn ->
-      Sample.exclude_from_attribute1("bob") == "action1 bob!"
+      assert      Sample.only_from_function1() == "action1"
     end
     assert_raise UndefinedFunctionError, fn ->
-      Sample.exclude_from_attribute2("bob") == "actio2 bob!"
+      assert  Sample.only_from_function2("bob") == "actio2 bob!"
     end
-    assert_raise UndefinedFunctionError, fn ->
-      assert Sample.exclude_from_attribute3() == "action3"
-    end
-    Sample.exclude_from_attribute1() == "action1"
-    assert Sample.exclude_from_attribute3("bob") == "action3 bob!"
+
   end
 
+  test "able to exclude functions from the export using an function" do
+    assert ExcludeFromFunction.exclude_from_function1() == "action1"
+    assert ExcludeFromFunction.exclude_from_function1("bob") == "action1 bob!"
+    assert ExcludeFromFunction.exclude_from_function2("bob") == "action2 bob!"
+    assert ExcludeFromFunction.exclude_from_function3("bob") == "action3 bob!"
 
+
+
+    assert_raise UndefinedFunctionError, fn ->
+      assert      Sample.exclude_from_function1("Bob") == "action1 Bob"
+    end
+    assert_raise UndefinedFunctionError, fn ->
+      assert  Sample.exclude_from_function2("bob") == "actio2 bob!"
+    end
+
+    assert    Sample.exclude_from_function1() == "action1"
+    assert Sample.exclude_from_function3("bob") == "action3 bob!"
+  end
   test "able to include only specific functions from the export" do
     assert OnlySomeAction.some_action1() == "action1"
     assert OnlySomeAction.some_action1("bob") == "action1 bob!"
@@ -87,11 +99,11 @@ defmodule ExExportTest do
     # assert Sample._private_action() == "_private_action"
     # assert Sample.__private_action() == "__private_action"
     assert_raise UndefinedFunctionError, fn ->
-      Sample._private_action() == "_private_action"
+      assert      Sample._private_action() == "_private_action"
     end
 
     assert_raise UndefinedFunctionError, fn ->
-      Sample.__private_action() == "__private_action"
+      assert Sample.__private_action() == "__private_action"
     end
   end
 end
