@@ -13,6 +13,7 @@ defmodule ExExport.MixProject do
       package: package(),
       description: description(),
       extra_applications: [:logger],
+      source_url: "https://github.com/r26d/ex_export",
       docs: [
         source_ref: "v#{version()}",
         main: "readme",
@@ -26,6 +27,7 @@ defmodule ExExport.MixProject do
       files: ["lib", "mix.exs", "README*", "LICENSE*"],
       maintainers: ["Dirk Elmendorf"],
       licenses: ["MIT"],
+
       links: %{
         "GitHub" => "https://github.com/r26D/ex_export"
       }
