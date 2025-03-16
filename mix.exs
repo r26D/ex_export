@@ -1,6 +1,6 @@
 defmodule ExExport.MixProject do
   use Mix.Project
-  @version "0.8.7"
+  @version "0.8.8"
   def project do
     [
       app: :ex_export,
