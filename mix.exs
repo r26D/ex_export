@@ -57,10 +57,10 @@ defmodule ExExport.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
-      {:mix_test_watch, "~> 1.1", only: :dev, runtime: false},
-      {:ex_unit_notifier, "~> 1.2", only: :test}
+      {:mix_test_watch, "~> 1.2", only: :dev, runtime: false},
+      {:ex_unit_notifier, "~> 1.3", only: :test}
     ]
   end
 
