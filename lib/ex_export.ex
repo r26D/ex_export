@@ -80,12 +80,10 @@ defmodule ExExport do
   end
 
   def show_definitions?, do: @show_definitions
-
-  def output_definition(msg) do
-    case show_definitions?() do
-      true -> IO.puts(msg)
-      _ -> nil
-    end
+  if @show_definitions do
+    def output_definition(msg), do: IO.puts( msg)
+  else
+    def output_definition(_msg), do: nil
   end
 
   def expand_module(module, caller, method \\ :manual)
